@@ -22,14 +22,12 @@ body
     height: 100vh;
     background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
     url('../images/background3.jpg') center/cover no-repeat fixed;
-    /* Optional blur and smooth look */
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
-    color: var(--light, #f5f5f5); /* fallback text color */
+    color: var(--light, #f5f5f5);
     font-family: 'Poppins', sans-serif;
     overflow-x: hidden;
 }
-
 
 section 
 {
@@ -49,7 +47,6 @@ section
     margin: 0 auto;
 }
 
-
 .section-title 
 {
     font-size: 2.5rem;
@@ -65,13 +62,11 @@ section
     transition: all 0.8s ease;
 }
 
-
 .section-title.visible 
 {
     opacity: 1;
     transform: translateY(0);
 }
-
 
 .card 
 {
@@ -88,7 +83,6 @@ section
     transition: all 0.8s ease;
 }
 
-
 .card.visible 
 {
     opacity: 1;
@@ -100,7 +94,6 @@ section
     transform: translateY(-10px);
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
 }
-
 
 .gradient-text 
 {
@@ -160,70 +153,40 @@ section
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
-
-.project-image1 
+/* Project Images */
+.project-image1,
+.project-image2,
+.project-image3 
 {
     width: 100%;
     height: 200px;
     border-radius: 10px;
     object-fit: cover;
     margin-bottom: 15px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: black;
+    font-size: 18px;
+    font-weight: bold;
+    position: relative;
+    overflow: hidden;
+}
+
+.project-image1 {
     background-image: url('../images/books.jpg');
-    background-size: cover;        
-    background-position: center;   
-    background-repeat: no-repeat;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: rgb(0, 0, 0);
-    font-size: 18px;
-    font-weight: bold;
-    position: relative;
-    overflow: hidden;
 }
 
- .project-image2 
- {
-    width: 100%;
-    height: 200px;
-    border-radius: 10px;
-    object-fit: cover;
-    margin-bottom: 15px;
+.project-image2 {
     background-image: url('../images/attendance.jpg');
-    background-size: cover;        
-    background-position: center;   
-    background-repeat: no-repeat;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: rgb(0, 0, 0);
-    font-size: 18px;
-    font-weight: bold;
-    position: relative;
-    overflow: hidden;
 }
 
- .project-image3 
- {
-    width: 100%;
-    height: 200px;
-    border-radius: 10px;
-    object-fit: cover;
-    margin-bottom: 15px;
+.project-image3 {
     background-image: url('../images/board1.jpg');
-    background-size: cover;        
-    background-position: center;   
-    background-repeat: no-repeat;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: rgb(0, 0, 0);
-    font-size: 18px;
-    font-weight: bold;
-    position: relative;
-    overflow: hidden;
 }
-
 
 .project-image::before 
 {
@@ -257,7 +220,6 @@ section
     margin-bottom: 15px;
 }
 
-
 /* about section */
 .about-image 
 {
@@ -267,7 +229,6 @@ section
     border-radius: 15px;
     overflow: hidden;
     margin-top: 20px;
-
 }
 
 .about-image img 
@@ -275,7 +236,7 @@ section
     width: 100%;
     height: 100%;
     object-fit: cover;
-    filter: brightness(0.4) blur(0.8px); /* makes image dark and slightly blurred */
+    filter: brightness(0.4) blur(0.8px);
     transition: all 0.2s ease;
 }
 
@@ -284,18 +245,16 @@ section
     content: "";
     position: absolute;
     inset: 0;
-     background: linear-gradient(90deg, rgba(33, 33, 35, 0.5), rgba(36, 31, 36, 0.278), rgba(43, 46, 43, 0.5));
+    background: linear-gradient(90deg, rgba(33, 33, 35, 0.5), rgba(36, 31, 36, 0.278), rgba(43, 46, 43, 0.5));
     border-radius: 15px;
 }
 
 .about-image:hover img 
 {
     filter: brightness(0.9) blur(0);
-
-
 }
-/* skills section */
 
+/* skills section */
 .skills-image 
 {
     width: 100%;
@@ -434,7 +393,7 @@ section
 
 .interests-grid 
 {
- display: grid;
+    display: grid;
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 1rem;
 }
@@ -465,7 +424,7 @@ section
     margin-bottom: 0.5rem;
 }
 
-  .interest-item span 
+.interest-item span 
 {
     color: #e0e0e0;
     font-size: 0.9rem;
@@ -486,7 +445,6 @@ section
     background-clip: text;
     color: transparent;
 }
-
 
 /* Skills Section */
 .skills-grid {
@@ -517,7 +475,6 @@ section
     background: linear-gradient(to right, rgba(184, 7, 4, 0.7), rgba(3, 3, 137, 0.7));
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-
     border-radius: 5px;
     width: 0;
     transition: width 1.5s ease;
@@ -720,31 +677,57 @@ footer {
     }
 }
 
-/* Responsive */
+/* Responsive Fix — BEST PART */
 @media (max-width: 768px) {
-    .hero-content h1 {
-        font-size: 2.5rem;
+
+    /* Fix first reason of extra space */
+    section {
+        min-height: auto !important;
+        padding: 20px 10px !important;
     }
-    
+
+    body {
+        height: auto !important;
+    }
+
+    /* Fix big gaps from grids */
+    .projects-grid,
+    .courses-grid,
+    .about-content,
+    .contact-content {
+        gap: 10px !important;
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Make hero better */
+    .hero-content h1 {
+        font-size: 2.2rem;
+    }
+
+    .hero-content p {
+        font-size: 1.2rem;
+    }
+
     .hero-stats {
         flex-direction: column;
         gap: 20px;
     }
-    
-    .about-content {
-        grid-template-columns: 1fr;
-    }
-    
-    .contact-content {
-        grid-template-columns: 1fr;
-    }
-    
-    .projects-grid, .courses-grid {
-        grid-template-columns: 1fr;
-    }
-    
+
+    /* Fix images size */
     .profile-image {
         width: 150px;
         height: 150px;
+    }
+
+    /* Remove extra spacing */
+    section, div {
+        margin: 0 !important;
+        padding: 10px !important;
+    }
+
+    /* Fix 100vh height */
+    .hero-section {
+        height: auto !important;
+        min-height: auto !important;
     }
 }
