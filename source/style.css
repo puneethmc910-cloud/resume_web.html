@@ -64,9 +64,21 @@ body
     color: white;
     text-decoration: none;
     transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-.nav-logo span {
+.logo-image {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid transparent;
+    background: linear-gradient(45deg, var(--primary), var(--secondary)) border-box;
+}
+
+.nav-logo span span {
     background: linear-gradient(to right, var(--primary), var(--secondary));
     -webkit-background-clip: text;
     background-clip: text;
@@ -209,6 +221,11 @@ body
     .nav-logo {
         font-size: 1.5rem;
     }
+
+    .logo-image {
+        width: 30px;
+        height: 30px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -219,6 +236,123 @@ body
     .nav-container {
         padding: 0 15px;
     }
+}
+
+/* ========== HERO SECTION STYLES ========== */
+#hero {
+    position: relative;
+    min-height: 100vh;
+    padding: 80px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.hero-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+                url('../images/background3.jpg') center/cover no-repeat;
+    z-index: -1;
+}
+
+.hero-content {
+    max-width: 1200px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 60px;
+    align-items: center;
+}
+
+.hero-text {
+    color: white;
+    font-family: 'Poppins', sans-serif;
+}
+
+.hero-text h1 {
+    font-size: 3.5rem;
+    margin-bottom: 1.5rem;
+    font-weight: 800;
+    line-height: 1.2;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.hero-text p {
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+    line-height: 1.6;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.hero-buttons {
+    margin: 2.5rem 0;
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeInUp 1s ease forwards 1.1s;
+}
+
+.hero-stats {
+    display: flex;
+    gap: 40px;
+    margin: 40px 0;
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeInUp 1s ease forwards 1.4s;
+}
+
+.hero-image {
+    display: flex;
+    justify-content: flex-end; /* This moves image to right */
+    align-items: center;
+}
+
+.hero-profile-image {
+    width: 350px;
+    height: 350px;
+    border-radius: 40%;
+    object-fit: cover;
+    border: 6px solid transparent;
+    background: linear-gradient(45deg, var(--primary), var(--secondary)) border-box;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease;
+    animation: float 3s ease-in-out infinite;
+    margin-right: -20px; /* Optional: pushes even more to right */
+}
+
+.hero-profile-image:hover {
+    transform: scale(1.05);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+/* Hero Animations */
+.hero-text h1 {
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeInUp 1s ease forwards 0.5s;
+}
+
+.hero-text p {
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeInUp 1s ease forwards 0.8s;
+}
+
+.hero-profile-image {
+    opacity: 0;
+    transform: translateY(30px) scale(0.9);
+    animation: fadeInUp 1s ease forwards 0.5s;
 }
 
 /* ========== EXISTING PORTFOLIO STYLES ========== */
@@ -245,7 +379,9 @@ section
     font-size: 2.5rem;
     margin-bottom: 2rem;
     text-align: center;
-    background: linear-gradient(to right, #c50808, #a7cab9);
+    font: bold;
+    font-family: 'Poppins', sans-serif;
+    background: white;
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -263,13 +399,13 @@ section
 
 .card 
 {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border-radius: 15px;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(30px);
+    border-radius: 10px;
     padding: 30px;
     margin: 20px 0;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(188, 179, 179, 0.3);
+    border: 1px solid rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     opacity: 0;
     transform: translateY(30px);
@@ -463,50 +599,6 @@ section
     align-items: center;
     justify-content: center;
     color: white;
-}
-
-/* Hero Section */
-#hero 
-{
-    text-align: center;
-    padding-top: 120px;
-    position: relative;
-}
-
-.hero-content h1 
-{
-    font-size: 3.5rem;
-    margin-bottom: 1rem;
-    opacity: 0;
-    transform: translateY(30px);
-    animation: fadeInUp 1s ease forwards 0.5s;
-}
-
-.hero-content p 
-{
-    font-size: 1.5rem;
-    margin-bottom: 2rem;
-    opacity: 0;
-    transform: translateY(30px);
-    animation: fadeInUp 1s ease forwards 0.8s;
-}
-
-.hero-buttons 
-{
-    opacity: 0;
-    transform: translateY(30px);
-    animation: fadeInUp 1s ease forwards 1.1s;
-}
-
-.hero-stats 
-{
-    display: flex;
-    justify-content: center;
-    gap: 40px;
-    margin: 40px 0;
-    opacity: 0;
-    transform: translateY(30px);
-    animation: fadeInUp 1s ease forwards 1.4s;
 }
 
 .stat 
@@ -872,6 +964,31 @@ footer {
 
 /* Responsive Fix */
 @media (max-width: 768px) {
+    /* Hero Section Responsive */
+    .hero-content {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        text-align: center;
+    }
+
+    .hero-text h1 {
+        font-size: 2.5rem;
+    }
+
+    .hero-text p {
+        font-size: 1.1rem;
+    }
+
+    .hero-profile-image {
+        width: 250px;
+        height: 250px;
+    }
+
+    .hero-stats {
+        flex-direction: column;
+        gap: 20px;
+    }
+
     /* Fix first reason of extra space */
     section {
         min-height: auto !important;
@@ -889,20 +1006,6 @@ footer {
     .contact-content {
         gap: 10px !important;
         grid-template-columns: 1fr !important;
-    }
-
-    /* Make hero better */
-    .hero-content h1 {
-        font-size: 2.2rem;
-    }
-
-    .hero-content p {
-        font-size: 1.2rem;
-    }
-
-    .hero-stats {
-        flex-direction: column;
-        gap: 20px;
     }
 
     /* Fix images size */
