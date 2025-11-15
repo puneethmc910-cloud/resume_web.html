@@ -21,7 +21,7 @@ body
     padding: 0;
     height: 100vh;
     background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
-    url('images/background3.jpg') center/cover no-repeat fixed; /* main image */
+    url('../images/background3.jpg') center/cover no-repeat fixed;
     /* Optional blur and smooth look */
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
@@ -168,7 +168,7 @@ section
     border-radius: 10px;
     object-fit: cover;
     margin-bottom: 15px;
-    background-image: url(images/books.jpg);
+    background-image: url('../images/books.jpg');
     background-size: cover;        
     background-position: center;   
     background-repeat: no-repeat;
@@ -189,7 +189,7 @@ section
     border-radius: 10px;
     object-fit: cover;
     margin-bottom: 15px;
-    background-image: url(images/attendance.jpg);
+    background-image: url('../images/attendance.jpg');
     background-size: cover;        
     background-position: center;   
     background-repeat: no-repeat;
@@ -210,7 +210,7 @@ section
     border-radius: 10px;
     object-fit: cover;
     margin-bottom: 15px;
-    background-image: url(images/board1.jpg);
+    background-image: url('../images/board1.jpg');
     background-size: cover;        
     background-position: center;   
     background-repeat: no-repeat;
@@ -302,7 +302,7 @@ section
     height: 200px;
     border-radius: 10px;
     object-fit: cover;
-    background-image: linear-gradient(45deg, #2575fc, #ff6b6b), url(images/skillsimage.jpg);
+    background-image: linear-gradient(45deg, #2575fc, #ff6b6b), url('../images/skillsimage.jpg');
     background-size: cover;
     background-position: center;
     background-blend-mode: overlay;
