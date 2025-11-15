@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Chalkboard Classroom</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #2c3e50;
+            color: #ecf0f1;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            background: #34495e;
+            padding: 20px;
+            gap: 10px;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+        }
+
+        .tool-group {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            padding: 5px 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+
+        .tool-group h3 {
+            font-size: 14px;
+            margin-right: 5px;
+            color: #bdc3c7;
+        }
+
+        button {
+    background: linear-gradient(135deg, #0466a8, #012237);
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+button:hover {
+    background: linear-gradient(135deg, #cb03a3, #370cc3);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+button.active {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    box-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+}
+
+button:disabled {
+    background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+        .color-option {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.color-option:hover {
+    transform: scale(1.2);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.color-option.selected {
+    border-color: white;
+    transform: scale(1.2);
+    box-shadow: 0 0 0 2px #3498db, 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* For mobile responsiveness */
+@media (max-width: 768px) {
+    .color-option {
+        width: 20px;
+        height: 20px;
+    }
+}
+        .size-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .size-slider {
+            width: 120px;
+        }
+
+        .size-preview {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #2c3e50;
+        }
+
+        .container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .chalkboard {
+            flex: 1;
+            background: url(board1.jpg) center/cover;
+            position: relative;
+            cursor: default;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        .chalkboard.write-mode {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="white" opacity="0.8"/></svg>') 12 12, auto;
+        }
+
+        .chalkboard.eraser-mode {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" fill="white" opacity="0.8"/></svg>') 12 12, auto;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .status {
+            padding: 10px;
+            background: #34495e;
+            text-align: center;
+            font-size: 14px;
+            color: #bdc3c7;
+        }
+
+        .recording-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #e74c3c;
+            border-radius: 50%;
+            margin-right: 5px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .tool-group {
+                justify-content: center;
+            }
+            
+            button {
+                padding: 10px;
+                font-size: 12px;
+            }
+            
+            .size-slider {
+                width: 100px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .tool-group {
+                flex-wrap: wrap;
+            }
+            
+            .color-option {
+                width: 20px;
+                height: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="toolbar">
+        <div class="tool-group">
+            <h3>Tools:</h3>
+            <button id="writeModeBtn">
+                <span>✏️</span> Write Mode
+            </button>
+            <button id="eraserBtn">
+                <span>🧽</span> Eraser
+            </button>
+            <button id="clearBtn">
+                <span>🗑️</span> Clear Board
+            </button>
+        </div>
+        
+        <div class="tool-group">
+    <h3>Colors:</h3>
+    <div class="color-option selected" style="background-color: white;" data-color="white"></div>
+    <div class="color-option" style="background-color: #ff7979;" data-color="#ff7979"></div>
+    <div class="color-option" style="background-color: #ff5252;" data-color="#ff5252"></div>
+    <div class="color-option" style="background-color: #7ed6df;" data-color="#7ed6df"></div>
+    <div class="color-option" style="background-color: #3498db;" data-color="#3498db"></div>
+    <div class="color-option" style="background-color: #4834d4;" data-color="#4834d4"></div>
+    <div class="color-option" style="background-color: #badc58;" data-color="#badc58"></div>
+    <div class="color-option" style="background-color: #f9ca24;" data-color="#f9ca24"></div>
+    <div class="color-option" style="background-color: #f0932b;" data-color="#f0932b"></div>
+    <div class="color-option" style="background-color: #eb4d4b;" data-color="#eb4d4b"></div>
+    <div class="color-option" style="background-color: #6ab04c;" data-color="#6ab04c"></div>
+    <div class="color-option" style="background-color: #22a6b3;" data-color="#22a6b3"></div>
+    <div class="color-option" style="background-color: #be2edd;" data-color="#be2edd"></div>
+    <div class="color-option" style="background-color: #4834d4;" data-color="#4834d4"></div>
+    <div class="color-option" style="background-color: #130f40;" data-color="#130f40"></div>
+</div>
+        
+        <div class="tool-group">
+            <h3>Size:</h3>
+            <div class="size-control">
+                <input type="range" min="1" max="30" value="5" class="size-slider" id="sizeSlider">
+                <div class="size-preview" id="sizePreview">5px</div>
+            </div>
+        </div>
+        
+        <div class="tool-group">
+            <h3>Recording:</h3>
+            <button id="startRecordBtn">
+                <span>🔴</span> Start Recording
+            </button>
+            <button id="stopRecordBtn" disabled>
+                <span>⏹️</span> Stop Recording
+            </button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="chalkboard" id="chalkboard">
+            <canvas id="drawingCanvas"></canvas>
+        </div>
+    </div>
+    
+    <div class="status" id="status">
+        Ready to draw. Click "Write Mode" to start.
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Canvas setup
+            const canvas = document.getElementById('drawingCanvas');
+            const ctx = canvas.getContext('2d');
+            const chalkboard = document.getElementById('chalkboard');
+            const status = document.getElementById('status');
+            
+            // Tool buttons
+            const writeModeBtn = document.getElementById('writeModeBtn');
+            const eraserBtn = document.getElementById('eraserBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const startRecordBtn = document.getElementById('startRecordBtn');
+            const stopRecordBtn = document.getElementById('stopRecordBtn');
+            
+            // Size controls
+            const sizeSlider = document.getElementById('sizeSlider');
+            const sizePreview = document.getElementById('sizePreview');
+            
+            // Color options
+            const colorOptions = document.querySelectorAll('.color-option');
+            
+            // Drawing state
+            let isDrawing = false;
+            let isWriteMode = false;
+            let isEraserMode = false;
+            let currentColor = 'white';
+            let currentSize = parseInt(sizeSlider.value);
+            let lastX = 0;
+            let lastY = 0;
+            
+            // Recording state
+            let mediaRecorder;
+            let recordedChunks = [];
+            let isRecording = false;
+            
+            // Set canvas size
+            function resizeCanvas() {
+                canvas.width = chalkboard.clientWidth;
+                canvas.height = chalkboard.clientHeight;
+                
+                // Clear with transparent background to show the board.jpg image
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+            
+            // Initialize canvas
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            // Update size preview
+            function updateSizePreview() {
+                currentSize = parseInt(sizeSlider.value);
+                sizePreview.textContent = currentSize + 'px';
+                sizePreview.style.width = (currentSize + 10) + 'px';
+                sizePreview.style.height = (currentSize + 10) + 'px';
+            }
+            
+            // Initialize size preview
+            updateSizePreview();
+            sizeSlider.addEventListener('input', updateSizePreview);
+            
+            // Drawing functions
+            function startDrawing(e) {
+                if (!isWriteMode && !isEraserMode) return;
+                
+                isDrawing = true;
+                [lastX, lastY] = getCoordinates(e);
+            }
+            
+            function draw(e) {
+                if (!isDrawing) return;
+                
+                const [x, y] = getCoordinates(e);
+                
+                ctx.lineJoin = 'round';
+                ctx.lineCap = 'round';
+                ctx.lineWidth = currentSize;
+                
+                if (isEraserMode) {
+                    ctx.globalCompositeOperation = 'destination-out';
+                    ctx.strokeStyle = 'rgba(0,0,0,1)';
+                } else {
+                    ctx.globalCompositeOperation = 'source-over';
+                    ctx.strokeStyle = currentColor;
+                }
+                
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                
+                // Add chalk texture effect
+                addChalkTexture(x, y);
+                
+                [lastX, lastY] = [x, y];
+            }
+            
+            function stopDrawing() {
+                isDrawing = false;
+            }
+            
+            function getCoordinates(e) {
+                let x, y;
+                
+                if (e.type.includes('touch')) {
+                    x = e.touches[0].clientX - canvas.getBoundingClientRect().left;
+                    y = e.touches[0].clientY - canvas.getBoundingClientRect().top;
+                } else {
+                    x = e.offsetX;
+                    y = e.offsetY;
+                }
+                
+                return [x, y];
+            }
+            
+            function addChalkTexture(x, y) {
+                // Create a subtle chalk texture by adding random dots
+                ctx.save();
+                ctx.globalAlpha = 0.3;
+                
+                for (let i = 0; i < 3; i++) {
+                    const offsetX = (Math.random() - 0.5) * currentSize;
+                    const offsetY = (Math.random() - 0.5) * currentSize;
+                    
+                    ctx.beginPath();
+                    ctx.arc(x + offsetX, y + offsetY, Math.random() * currentSize / 3, 0, Math.PI * 2);
+                    ctx.fillStyle = isEraserMode ? 'rgba(0,0,0,0.5)' : currentColor;
+                    ctx.fill();
+                }
+                
+                ctx.restore();
+            }
+            
+            // Event listeners for drawing
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+            
+            canvas.addEventListener('touchstart', startDrawing);
+            canvas.addEventListener('touchmove', draw);
+            canvas.addEventListener('touchend', stopDrawing);
+            
+            // Tool functions
+            writeModeBtn.addEventListener('click', function() {
+                isWriteMode = !isWriteMode;
+                isEraserMode = false;
+                
+                if (isWriteMode) {
+                    writeModeBtn.classList.add('active');
+                    eraserBtn.classList.remove('active');
+                    chalkboard.classList.add('write-mode');
+                    chalkboard.classList.remove('eraser-mode');
+                    status.textContent = 'Write mode active. Click and drag to draw.';
+                } else {
+                    writeModeBtn.classList.remove('active');
+                    chalkboard.classList.remove('write-mode');
+                    status.textContent = 'Write mode deactivated.';
+                }
+            });
+            
+            eraserBtn.addEventListener('click', function() {
+                isEraserMode = !isEraserMode;
+                isWriteMode = false;
+                
+                if (isEraserMode) {
+                    eraserBtn.classList.add('active');
+                    writeModeBtn.classList.remove('active');
+                    chalkboard.classList.add('eraser-mode');
+                    chalkboard.classList.remove('write-mode');
+                    status.textContent = 'Eraser mode active. Click and drag to erase.';
+                } else {
+                    eraserBtn.classList.remove('active');
+                    chalkboard.classList.remove('eraser-mode');
+                    status.textContent = 'Eraser mode deactivated.';
+                }
+            });
+            
+            clearBtn.addEventListener('click', function() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                status.textContent = 'Board cleared.';
+            });
+            
+            // Color selection
+            colorOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    colorOptions.forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    currentColor = this.getAttribute('data-color');
+                    status.textContent = `Color changed to ${currentColor}.`;
+                });
+            });
+            
+            // Screen recording
+            startRecordBtn.addEventListener('click', async function() {
+                try {
+                    const stream = await navigator.mediaDevices.getDisplayMedia({
+                        video: { mediaSource: 'screen' }
+                    });
+                    
+                    mediaRecorder = new MediaRecorder(stream);
+                    recordedChunks = [];
+                    
+                    mediaRecorder.ondataavailable = function(e) {
+                        if (e.data.size > 0) {
+                            recordedChunks.push(e.data);
+                        }
+                    };
+                    
+                    mediaRecorder.onstop = function() {
+                        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'chalkboard-session.webm';
+                        a.click();
+                        URL.revokeObjectURL(url);
+                        
+                        status.innerHTML = '<span class="recording-indicator"></span> Recording stopped and downloaded.';
+                        startRecordBtn.disabled = false;
+                        stopRecordBtn.disabled = true;
+                        isRecording = false;
+                    };
+                    
+                    mediaRecorder.start();
+                    isRecording = true;
+                    startRecordBtn.disabled = true;
+                    stopRecordBtn.disabled = false;
+                    status.innerHTML = '<span class="recording-indicator"></span> Recording in progress...';
+                } catch (err) {
+                    console.error('Error starting recording:', err);
+                    status.textContent = 'Error starting recording. Please try again.';
+                }
+            });
+            
+            stopRecordBtn.addEventListener('click', function() {
+                if (mediaRecorder && isRecording) {
+                    mediaRecorder.stop();
+                    mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                }
+            });
+        });
+    </script>
+</body>
+</html>

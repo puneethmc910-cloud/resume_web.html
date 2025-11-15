@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Attendance Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+        }
+
+        body {
+            background: linear-gradient(135deg, #768177 0%, #938383 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--dark);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeIn 1s ease;
+        }
+
+        header h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(45deg, #b0383c, #4e1809);
+            background-clip: text;
+            -webkit-background-clip: text;
+            
+
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: slideUp 0.5s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .card h3 {
+            color: white;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card h3 i {
+            font-size: 1.5rem;
+        }
+
+        .stat {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-desc {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            animation: slideUp 0.7s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .panel h2 {
+            color: white;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            color: white;
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #4361ee, #3a0ca3);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(45deg, #3a0ca3, #4361ee);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #4cc9f0, #4895ef);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #f72585, #b5179e);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(45deg, #f8961e, #f3722c);
+            color: white;
+        }
+
+        .subject-list {
+            list-style: none;
+            margin-top: 20px;
+        }
+
+        .subject-item {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .subject-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .subject-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .attendance-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .attendance-table th,
+        .attendance-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .attendance-table th {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-weight: 600;
+        }
+
+        .attendance-table tr:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .status-present {
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        .status-absent {
+            color: var(--danger);
+            font-weight: 600;
+        }
+
+        .attendance-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .present-btn {
+            background: rgba(76, 201, 240, 0.2);
+            color: var(--success);
+            border: 1px solid rgba(76, 201, 240, 0.5);
+        }
+
+        .present-btn:hover {
+            background: var(--success);
+            color: white;
+        }
+
+        .absent-btn {
+            background: rgba(247, 37, 133, 0.2);
+            color: var(--danger);
+            border: 1px solid rgba(247, 37, 133, 0.5);
+        }
+
+        .absent-btn:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .bunk-counter {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: white;
+        }
+
+        .bunk-counter h3 {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .bunk-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .bunk-stat {
+            text-align: center;
+        }
+
+        .bunk-stat .value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--warning);
+        }
+
+        .bunk-stat .label {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            transform: translateX(150%);
+            transition: transform 0.5s ease;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: rgba(76, 201, 240, 0.2);
+            border: 1px solid rgba(76, 201, 240, 0.5);
+        }
+
+        .notification.error {
+            background: rgba(247, 37, 133, 0.2);
+            border: 1px solid rgba(247, 37, 133, 0.5);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-user-graduate"></i> Student Attendance Manager</h1>
+            <p>Track and manage student attendance with ease</p>
+        </header>
+
+        <div class="dashboard">
+            <div class="card">
+                <h3><i class="fas fa-book"></i> Total Subjects</h3>
+                <div class="stat" id="total-subjects">0</div>
+                <div class="stat-desc">Subjects added</div>
+            </div>
+            <div class="card">
+                <h3><i class="fas fa-calendar-check"></i> Attendance Rate</h3>
+                <div class="stat" id="attendance-rate">0%</div>
+                <div class="stat-desc">Overall attendance</div>
+            </div>
+            <div class="card">
+                <h3><i class="fas fa-chart-line"></i> This Month</h3>
+                <div class="stat" id="month-attendance">0%</div>
+                <div class="stat-desc">Monthly attendance</div>
+            </div>
+            <div class="card">
+                <h3><i class="fas fa-bed"></i> Remaining Bunks</h3>
+                <div class="stat" id="remaining-bunks">0</div>
+                <div class="stat-desc">Classes you can bunk</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="panel">
+                <h2><i class="fas fa-plus-circle"></i> Add New Subject</h2>
+                <div class="form-group">
+                    <label for="subject-name">Subject Name</label>
+                    <input type="text" id="subject-name" class="form-control" placeholder="e.g., Mathematics">
+                </div>
+                <div class="form-group">
+                    <label for="subject-code">Subject Code</label>
+                    <input type="text" id="subject-code" class="form-control" placeholder="e.g., MATH101">
+                </div>
+                <div class="form-group">
+                    <label for="subject-teacher">Teacher Name</label>
+                    <input type="text" id="subject-teacher" class="form-control" placeholder="e.g., Dr. Smith">
+                </div>
+                <button class="btn btn-primary" id="add-subject">
+                    <i class="fas fa-plus"></i> Add Subject
+                </button>
+
+                <h2 style="margin-top: 30px;"><i class="fas fa-list"></i> Your Subjects</h2>
+                <ul class="subject-list" id="subjects-container">
+                    <!-- Subjects will be added here dynamically -->
+                </ul>
+            </div>
+
+            <div class="panel">
+                <h2><i class="fas fa-calendar-alt"></i> Daily Attendance</h2>
+                <div class="form-group">
+                    <label for="attendance-date">Select Date</label>
+                    <input type="date" id="attendance-date" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="attendance-subject">Select Subject</label>
+                    <select id="attendance-subject" class="form-control">
+                        <option value="">-- Select a subject --</option>
+                    </select>
+                </div>
+
+                <div class="bunk-counter">
+                    <h3><i class="fas fa-bed"></i> Bunk Counter</h3>
+                    <p>Track how many classes you've bunked and your attendance percentage</p>
+                    <div class="bunk-stats">
+                        <div class="bunk-stat">
+                            <div class="value" id="total-bunks">0</div>
+                            <div class="label">Total Bunks</div>
+                        </div>
+                        <div class="bunk-stat">
+                            <div class="value" id="bunk-percentage">0%</div>
+                            <div class="label">Bunk Percentage</div>
+                        </div>
+                        <div class="bunk-stat">
+                            <div class="value" id="safe-bunks">5</div>
+                            <div class="label">Safe Bunks Left</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="attendance-section">
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard-list"></i>
+                        <h3>No subject selected</h3>
+                        <p>Please select a subject to mark attendance</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Student Attendance Management System &copy; 2025 | Designed with Puneeth M C<i class="fas fa-heart" style="color: var(--danger);"></i></p>
+        </footer>
+    </div>
+
+    <div class="notification" id="notification">
+        Operation completed successfully!
+    </div>
+
+    <script>
+        // Sample data
+        let subjects = [
+            { id: 1, name: "Mathematics", code: "MATH101", teacher: "Dr. Smith", attendance: [] },
+            { id: 2, name: "Physics", code: "PHY102", teacher: "Prof. Johnson", attendance: [] },
+            { id: 3, name: "Chemistry", code: "CHEM103", teacher: "Dr. Williams", attendance: [] }
+        ];
+
+        let nextSubjectId = 4;
+
+        // DOM Elements
+        const totalSubjectsEl = document.getElementById('total-subjects');
+        const attendanceRateEl = document.getElementById('attendance-rate');
+        const monthAttendanceEl = document.getElementById('month-attendance');
+        const remainingBunksEl = document.getElementById('remaining-bunks');
+        const subjectsContainer = document.getElementById('subjects-container');
+        const addSubjectBtn = document.getElementById('add-subject');
+        const attendanceSubjectEl = document.getElementById('attendance-subject');
+        const attendanceSection = document.getElementById('attendance-section');
+        const notificationEl = document.getElementById('notification');
+        const totalBunksEl = document.getElementById('total-bunks');
+        const bunkPercentageEl = document.getElementById('bunk-percentage');
+        const safeBunksEl = document.getElementById('safe-bunks');
+
+        // Initialize the app
+        function init() {
+            updateDashboard();
+            renderSubjects();
+            populateSubjectDropdown();
+            setupEventListeners();
+            
+            // Set today's date as default
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('attendance-date').value = today;
+        }
+
+        // Update dashboard statistics
+        function updateDashboard() {
+            totalSubjectsEl.textContent = subjects.length;
+            
+            // Calculate overall attendance rate
+            let totalDays = 0;
+            let presentDays = 0;
+            let bunkedDays = 0;
+            
+            subjects.forEach(subject => {
+                subject.attendance.forEach(record => {
+                    totalDays++;
+                    if (record.status === 'present') presentDays++;
+                    if (record.status === 'absent') bunkedDays++;
+                });
+            });
+            
+            const overallRate = totalDays > 0 ? Math.round((presentDays / totalDays) * 100) : 0;
+            attendanceRateEl.textContent = `${overallRate}%`;
+            
+            // Calculate this month's attendance
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+            
+            let monthDays = 0;
+            let monthPresent = 0;
+            
+            subjects.forEach(subject => {
+                subject.attendance.forEach(record => {
+                    const recordDate = new Date(record.date);
+                    if (recordDate.getMonth() === currentMonth && recordDate.getFullYear() === currentYear) {
+                        monthDays++;
+                        if (record.status === 'present') monthPresent++;
+                    }
+                });
+            });
+            
+            const monthRate = monthDays > 0 ? Math.round((monthPresent / monthDays) * 100) : 0;
+            monthAttendanceEl.textContent = `${monthRate}%`;
+            
+            // Calculate remaining bunking classes (assuming 75% attendance required)
+            const requiredAttendance = Math.ceil(totalDays * 0.75);
+            const currentAttendance = presentDays;
+            const remainingBunks = Math.max(0, (totalDays - requiredAttendance) - (totalDays - currentAttendance));
+            remainingBunksEl.textContent = remainingBunks;
+            
+            // Update bunk counter
+            totalBunksEl.textContent = bunkedDays;
+            const bunkPercentage = totalDays > 0 ? Math.round((bunkedDays / totalDays) * 100) : 0;
+            bunkPercentageEl.textContent = `${bunkPercentage}%`;
+            safeBunksEl.textContent = remainingBunks;
+        }
+
+        // Render subjects list
+        function renderSubjects() {
+            subjectsContainer.innerHTML = '';
+            
+            if (subjects.length === 0) {
+                subjectsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-book-open"></i>
+                        <h3>No subjects added yet</h3>
+                        <p>Add your first subject to get started</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            subjects.forEach(subject => {
+                const subjectItem = document.createElement('li');
+                subjectItem.className = 'subject-item';
+                
+                // Calculate attendance for this subject
+                let totalDays = subject.attendance.length;
+                let presentDays = subject.attendance.filter(record => record.status === 'present').length;
+                const attendanceRate = totalDays > 0 ? Math.round((presentDays / totalDays) * 100) : 0;
+                
+                subjectItem.innerHTML = `
+                    <div>
+                        <strong>${subject.name}</strong> (${subject.code})
+                        <div style="font-size: 0.8rem; color: rgba(255, 255, 255, 0.7); margin-top: 5px;">
+                            ${subject.teacher} | ${attendanceRate}% attendance
+                        </div>
+                    </div>
+                    <div class="subject-actions">
+                        <button class="btn btn-success view-attendance" data-id="${subject.id}">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-warning edit-subject" data-id="${subject.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-danger delete-subject" data-id="${subject.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                
+                subjectsContainer.appendChild(subjectItem);
+            });
+        }
+
+        // Populate subject dropdown
+        function populateSubjectDropdown() {
+            attendanceSubjectEl.innerHTML = '<option value="">-- Select a subject --</option>';
+            
+            subjects.forEach(subject => {
+                const option = document.createElement('option');
+                option.value = subject.id;
+                option.textContent = `${subject.name} (${subject.code})`;
+                attendanceSubjectEl.appendChild(option);
+            });
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Add subject
+            addSubjectBtn.addEventListener('click', addSubject);
+            
+            // Subject selection for attendance
+            attendanceSubjectEl.addEventListener('change', handleSubjectSelection);
+            
+            // Subject actions (view, edit, delete)
+            subjectsContainer.addEventListener('click', handleSubjectActions);
+        }
+
+        // Add new subject
+        function addSubject() {
+            const name = document.getElementById('subject-name').value.trim();
+            const code = document.getElementById('subject-code').value.trim();
+            const teacher = document.getElementById('subject-teacher').value.trim();
+            
+            if (!name || !code || !teacher) {
+                showNotification('Please fill in all fields', 'error');
+                return;
+            }
+            
+            const newSubject = {
+                id: nextSubjectId++,
+                name,
+                code,
+                teacher,
+                attendance: []
+            };
+            
+            subjects.push(newSubject);
+            
+            // Clear form
+            document.getElementById('subject-name').value = '';
+            document.getElementById('subject-code').value = '';
+            document.getElementById('subject-teacher').value = '';
+            
+            updateDashboard();
+            renderSubjects();
+            populateSubjectDropdown();
+            showNotification('Subject added successfully!', 'success');
+        }
+
+        // Handle subject selection for attendance
+        function handleSubjectSelection() {
+            const subjectId = parseInt(attendanceSubjectEl.value);
+            if (!subjectId) {
+                attendanceSection.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard-list"></i>
+                        <h3>No subject selected</h3>
+                        <p>Please select a subject to mark attendance</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const subject = subjects.find(s => s.id === subjectId);
+            if (!subject) return;
+            
+            renderAttendanceTable(subject);
+        }
+
+        // Render attendance table for selected subject
+        function renderAttendanceTable(subject) {
+            const date = document.getElementById('attendance-date').value;
+            
+            // Check if attendance already exists for this date
+            const existingRecord = subject.attendance.find(record => record.date === date);
+            
+            attendanceSection.innerHTML = `
+                <h3 style="margin-bottom: 15px; color: white;">Mark Attendance for ${subject.name}</h3>
+                <p style="margin-bottom: 20px; color: rgba(255, 255, 255, 0.7);">Date: ${formatDate(date)}</p>
+                
+                <div class="attendance-actions" style="margin-bottom: 20px;">
+                    <button class="action-btn present-btn" id="mark-present">
+                        <i class="fas fa-check"></i> Mark as Present
+                    </button>
+                    <button class="action-btn absent-btn" id="mark-absent">
+                        <i class="fas fa-times"></i> Mark as Absent
+                    </button>
+                </div>
+                
+                <div style="margin-top: 30px;">
+                    <h4 style="color: white;">Attendance History</h4>
+                    ${subject.attendance.length > 0 ? 
+                        `<table class="attendance-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${subject.attendance.map(record => `
+                                    <tr>
+                                        <td>${formatDate(record.date)}</td>
+                                        <td class="status-${record.status}">${record.status.charAt(0).toUpperCase() + record.status.slice(1)}</td>
+                                        <td>
+                                            <button class="action-btn present-btn edit-attendance" data-date="${record.date}">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="action-btn absent-btn delete-attendance" data-date="${record.date}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>` 
+                        : 
+                        `<div class="empty-state" style="padding: 20px;">
+                            <i class="fas fa-history"></i>
+                            <p>No attendance records yet</p>
+                        </div>`
+                    }
+                </div>
+            `;
+            
+            // Add event listeners for attendance buttons
+            document.getElementById('mark-present').addEventListener('click', () => markAttendance(subject.id, date, 'present'));
+            document.getElementById('mark-absent').addEventListener('click', () => markAttendance(subject.id, date, 'absent'));
+            
+            // Add event listeners for existing records
+            document.querySelectorAll('.edit-attendance').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const recordDate = this.getAttribute('data-date');
+                    document.getElementById('attendance-date').value = recordDate;
+                    handleSubjectSelection();
+                });
+            });
+            
+            document.querySelectorAll('.delete-attendance').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const recordDate = this.getAttribute('data-date');
+                    deleteAttendance(subject.id, recordDate);
+                });
+            });
+        }
+
+        // Mark attendance
+        function markAttendance(subjectId, date, status) {
+            const subject = subjects.find(s => s.id === subjectId);
+            if (!subject) return;
+            
+            // Check if record already exists
+            const existingIndex = subject.attendance.findIndex(record => record.date === date);
+            
+            if (existingIndex !== -1) {
+                // Update existing record
+                subject.attendance[existingIndex].status = status;
+            } else {
+                // Add new record
+                subject.attendance.push({ date, status });
+            }
+            
+            updateDashboard();
+            handleSubjectSelection();
+            showNotification(`Attendance marked as ${status}`, 'success');
+        }
+
+        // Delete attendance record
+        function deleteAttendance(subjectId, date) {
+            const subject = subjects.find(s => s.id === subjectId);
+            if (!subject) return;
+            
+            subject.attendance = subject.attendance.filter(record => record.date !== date);
+            
+            updateDashboard();
+            handleSubjectSelection();
+            showNotification('Attendance record deleted', 'success');
+        }
+
+        // Handle subject actions (view, edit, delete)
+        function handleSubjectActions(e) {
+            if (e.target.closest('.view-attendance')) {
+                const subjectId = parseInt(e.target.closest('.view-attendance').getAttribute('data-id'));
+                attendanceSubjectEl.value = subjectId;
+                handleSubjectSelection();
+            }
+            
+            if (e.target.closest('.delete-subject')) {
+                const subjectId = parseInt(e.target.closest('.delete-subject').getAttribute('data-id'));
+                deleteSubject(subjectId);
+            }
+            
+            if (e.target.closest('.edit-subject')) {
+                const subjectId = parseInt(e.target.closest('.edit-subject').getAttribute('data-id'));
+                editSubject(subjectId);
+            }
+        }
+
+        // Delete subject
+        function deleteSubject(subjectId) {
+            if (!confirm('Are you sure you want to delete this subject? All attendance records will be lost.')) {
+                return;
+            }
+            
+            subjects = subjects.filter(s => s.id !== subjectId);
+            
+            updateDashboard();
+            renderSubjects();
+            populateSubjectDropdown();
+            
+            // If the deleted subject was selected, clear the attendance section
+            if (parseInt(attendanceSubjectEl.value) === subjectId) {
+                attendanceSubjectEl.value = '';
+                handleSubjectSelection();
+            }
+            
+            showNotification('Subject deleted successfully', 'success');
+        }
+
+        // Edit subject (placeholder function)
+        function editSubject(subjectId) {
+            showNotification('Edit feature coming soon!', 'success');
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            notificationEl.textContent = message;
+            notificationEl.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notificationEl.classList.remove('show');
+            }, 3000);
+        }
+
+        // Format date for display
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString(undefined, options);
+        }
+
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
