@@ -505,7 +505,7 @@ section
 
 #education .card:hover {
     transform: translateY(-10px);
-    box-shadow: 0 15px 35px rgba(2, 14, 71, 0.4);
+    box-shadow: 0 15px 35px rgba(10, 45, 219, 0.4);
 }
 
 .education-content {
@@ -553,11 +553,13 @@ section
 
 .education-details {
     flex: 1;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
+    background: linear-gradient(135deg, #562002 0%, #011540 50%, #090236 100%);
     padding: 25px;
+    border-radius: 20px;
     border-left: 4px solid var(--primary);
     transition: all 0.3s ease;
+    color: white; /* Change text color to white */
+    position: relative;
 }
 
 .education-details:hover {
@@ -761,10 +763,11 @@ section
 .skills-image 
 {
     width: 100%;
-    height: 200px;
+    height: 270px;
     border-radius: 10px;
     object-fit: cover;
-    background-image: linear-gradient(45deg, #2575fc, #ff6b6b), url('../images/skillsimage.jpg');
+    background-size: cover;
+    background-image: linear-gradient(45deg, #2575fc, #ff6b6b), url('../images/ironman.jpg');
     background-size: cover;
     background-position: center;
     background-blend-mode: overlay;
