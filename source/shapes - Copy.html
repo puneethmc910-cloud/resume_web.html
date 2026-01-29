@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Drawing Board</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #2c3e50;
+            color: #ecf0f1;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            background: #34495e;
+            padding: 10px;
+            gap: 10px;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+        }
+
+        .tool-group {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            padding: 5px 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+
+        .tool-group h3 {
+            font-size: 14px;
+            margin-right: 5px;
+            color: #bdc3c7;
+        }
+
+        button {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #2980b9, #2573a7);
+            transform: translateY(-2px);
+        }
+
+        button.active {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .color-option {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.2s;
+        }
+
+        .color-option:hover {
+            transform: scale(1.2);
+        }
+
+        .color-option.selected {
+            border-color: white;
+            transform: scale(1.2);
+        }
+
+        .size-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .size-slider {
+            width: 120px;
+        }
+
+        .size-preview {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #2c3e50;
+        }
+
+        .container {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .drawing-board {
+            width: 100%;
+            height: 100%;
+            background: white;
+            position: relative;
+            cursor: crosshair;
+            transition: background 0.3s ease;
+        }
+
+        .drawing-board.chalkboard {
+            background: #0a5f38;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(0, 0, 0, 0.1) 1px, transparent 1px),
+                radial-gradient(circle at 80% 70%, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px, 50px 50px;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .status {
+            padding: 10px;
+            background: #34495e;
+            text-align: center;
+            font-size: 14px;
+            color: #bdc3c7;
+        }
+
+        .recording-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #e74c3c;
+            border-radius: 50%;
+            margin-right: 5px;
+            animation: pulse 1.5s infinite;
+        }
+
+        .shapes-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            padding: 5px;
+        }
+
+        .shape-option {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.2s;
+        }
+
+        .shape-option:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .shape-option.selected {
+            border-color: #3498db;
+            background: rgba(52, 152, 219, 0.2);
+            transform: scale(1.1);
+        }
+
+        @keyframes shapeDetected {
+            0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(46, 204, 113, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+        }
+
+        .shape-detected {
+            animation: shapeDetected 1s ease;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .tool-group {
+                justify-content: center;
+            }
+            
+            button {
+                padding: 10px;
+                font-size: 12px;
+            }
+            
+            .size-slider {
+                width: 100px;
+            }
+
+            .shapes-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="toolbar">
+        <div class="tool-group">
+            <h3>Modes:</h3>
+            <button id="writeModeBtn" class="active">
+                <span>✏️</span> Write
+            </button>
+            <button id="shapeModeBtn">
+                <span>🔷</span> Shape
+            </button>
+            <button id="eraserBtn">
+                <span>🧽</span> Eraser
+            </button>
+        </div>
+        
+        <div class="tool-group">
+            <h3>Tools:</h3>
+            <button id="undoBtn" disabled>
+                <span>↶</span> Undo
+            </button>
+            <button id="redoBtn" disabled>
+                <span>↷</span> Redo
+            </button>
+            <button id="clearBtn">
+                <span>🗑️</span> Clear
+            </button>
+        </div>
+        
+        <div class="tool-group">
+            <h3>Colors:</h3>
+            <div class="color-option selected" style="background-color: #000000;" data-color="#000000"></div>
+            <div class="color-option" style="background-color: #e74c3c;" data-color="#e74c3c"></div>
+            <div class="color-option" style="background-color: #3498db;" data-color="#3498db"></div>
+            <div class="color-option" style="background-color: #2ecc71;" data-color="#2ecc71"></div>
+            <div class="color-option" style="background-color: #f1c40f;" data-color="#f1c40f"></div>
+        </div>
+        
+        <div class="tool-group">
+            <h3>Size:</h3>
+            <div class="size-control">
+                <input type="range" min="1" max="30" value="5" class="size-slider" id="sizeSlider">
+                <div class="size-preview" id="sizePreview">5px</div>
+            </div>
+        </div>
+
+        <div class="tool-group">
+            <h3>Shapes:</h3>
+            <div class="shapes-grid">
+                <div class="shape-option" data-shape="line" title="Line">📏</div>
+                <div class="shape-option" data-shape="rectangle" title="Rectangle">⬜</div>
+                <div class="shape-option" data-shape="circle" title="Circle">⭕</div>
+                <div class="shape-option" data-shape="triangle" title="Triangle">🔺</div>
+                <div class="shape-option" data-shape="arrow" title="Arrow">➡️</div>
+                <div class="shape-option" data-shape="star" title="Star">⭐</div>
+                <div class="shape-option" data-shape="polygon" title="Polygon">🔷</div>
+            </div>
+        </div>
+        
+        <div class="tool-group">
+            <h3>Style:</h3>
+            <button id="whiteboardBtn" class="active">
+                <span>⬜</span> Whiteboard
+            </button>
+            <button id="chalkboardBtn">
+                <span>🟩</span> Chalkboard
+            </button>
+        </div>
+        
+        <div class="tool-group">
+            <h3>Recording:</h3>
+            <button id="startRecordBtn">
+                <span>🔴</span> Record
+            </button>
+            <button id="stopRecordBtn" disabled>
+                <span>⏹️</span> Stop
+            </button>
+            <button id="downloadRecordBtn" disabled>
+                <span>📥</span> Download
+            </button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="drawing-board" id="drawingBoard">
+            <canvas id="mainCanvas"></canvas>
+        </div>
+    </div>
+    
+    <div class="status" id="status">
+        Ready to draw. Select Write mode to start drawing.
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Canvas setup
+            const canvas = document.getElementById('mainCanvas');
+            const ctx = canvas.getContext('2d');
+            const drawingBoard = document.getElementById('drawingBoard');
+            const status = document.getElementById('status');
+            
+            // Tool buttons
+            const writeModeBtn = document.getElementById('writeModeBtn');
+            const shapeModeBtn = document.getElementById('shapeModeBtn');
+            const eraserBtn = document.getElementById('eraserBtn');
+            const undoBtn = document.getElementById('undoBtn');
+            const redoBtn = document.getElementById('redoBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const whiteboardBtn = document.getElementById('whiteboardBtn');
+            const chalkboardBtn = document.getElementById('chalkboardBtn');
+            const startRecordBtn = document.getElementById('startRecordBtn');
+            const stopRecordBtn = document.getElementById('stopRecordBtn');
+            const downloadRecordBtn = document.getElementById('downloadRecordBtn');
+            
+            // Controls
+            const sizeSlider = document.getElementById('sizeSlider');
+            const sizePreview = document.getElementById('sizePreview');
+            const colorOptions = document.querySelectorAll('.color-option');
+            const shapeOptions = document.querySelectorAll('.shape-option');
+
+            // Drawing state
+            let isDrawing = false;
+            let currentMode = 'write'; // 'write', 'shape', 'eraser'
+            let currentColor = '#000000';
+            let currentSize = 5;
+            let currentShape = null;
+            let points = [];
+            let drawingHistory = [];
+            let historyStep = -1;
+            
+            // Recording state
+            let mediaRecorder = null;
+            let recordedChunks = [];
+            let isRecording = false;
+            let recordedVideoUrl = null;
+
+            // Initialize canvas
+            function initCanvas() {
+                const container = document.querySelector('.container');
+                canvas.width = container.clientWidth;
+                canvas.height = container.clientHeight;
+                
+                clearCanvas();
+                saveToHistory();
+            }
+
+            function clearCanvas() {
+                if (drawingBoard.classList.contains('chalkboard')) {
+                    ctx.fillStyle = '#0a5f38';
+                } else {
+                    ctx.fillStyle = 'white';
+                }
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            function saveToHistory() {
+                // Remove future steps if we're not at the end
+                if (historyStep < drawingHistory.length - 1) {
+                    drawingHistory = drawingHistory.slice(0, historyStep + 1);
+                }
+                
+                drawingHistory.push(canvas.toDataURL());
+                historyStep++;
+                updateHistoryButtons();
+            }
+
+            function undo() {
+                if (historyStep > 0) {
+                    historyStep--;
+                    const img = new Image();
+                    img.onload = function() {
+                        clearCanvas();
+                        ctx.drawImage(img, 0, 0);
+                    };
+                    img.src = drawingHistory[historyStep];
+                    updateHistoryButtons();
+                }
+            }
+
+            function redo() {
+                if (historyStep < drawingHistory.length - 1) {
+                    historyStep++;
+                    const img = new Image();
+                    img.onload = function() {
+                        clearCanvas();
+                        ctx.drawImage(img, 0, 0);
+                    };
+                    img.src = drawingHistory[historyStep];
+                    updateHistoryButtons();
+                }
+            }
+
+            function updateHistoryButtons() {
+                undoBtn.disabled = historyStep <= 0;
+                redoBtn.disabled = historyStep >= drawingHistory.length - 1;
+            }
+
+            // Drawing functions
+            function startDrawing(e) {
+                if (currentMode === 'shape' && !currentShape) {
+                    status.textContent = 'Please select a shape first';
+                    return;
+                }
+
+                isDrawing = true;
+                points = [];
+                const pos = getMousePos(e);
+                points.push(pos);
+                
+                ctx.beginPath();
+                ctx.moveTo(pos.x, pos.y);
+                
+                if (currentMode === 'write' || currentMode === 'eraser') {
+                    ctx.lineWidth = currentSize;
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+                    
+                    if (currentMode === 'eraser') {
+                        ctx.globalCompositeOperation = 'destination-out';
+                        ctx.strokeStyle = 'rgba(0,0,0,1)';
+                    } else {
+                        ctx.globalCompositeOperation = 'source-over';
+                        ctx.strokeStyle = currentColor;
+                    }
+                }
+            }
+
+            function draw(e) {
+                if (!isDrawing) return;
+                
+                const pos = getMousePos(e);
+                points.push(pos);
+                
+                if (currentMode === 'write' || currentMode === 'eraser') {
+                    ctx.lineTo(pos.x, pos.y);
+                    ctx.stroke();
+                    
+                    // Add chalk texture for chalkboard
+                    if (drawingBoard.classList.contains('chalkboard') && currentMode === 'write') {
+                        addChalkTexture(pos.x, pos.y);
+                    }
+                }
+            }
+
+            function stopDrawing() {
+                if (!isDrawing) return;
+                
+                isDrawing = false;
+                ctx.closePath();
+                
+                if (currentMode === 'shape' && points.length > 10) {
+                    detectAndDrawShape();
+                } else if (points.length > 2) {
+                    saveToHistory();
+                }
+            }
+
+            function getMousePos(e) {
+                const rect = canvas.getBoundingClientRect();
+                return {
+                    x: e.clientX - rect.left,
+                    y: e.clientY - rect.top
+                };
+            }
+
+            function addChalkTexture(x, y) {
+                ctx.save();
+                ctx.globalAlpha = 0.3;
+                for (let i = 0; i < 3; i++) {
+                    const offsetX = (Math.random() - 0.5) * currentSize;
+                    const offsetY = (Math.random() - 0.5) * currentSize;
+                    ctx.beginPath();
+                    ctx.arc(x + offsetX, y + offsetY, Math.random() * currentSize / 3, 0, Math.PI * 2);
+                    ctx.fillStyle = currentColor;
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+
+            // Shape detection and drawing
+            function detectAndDrawShape() {
+                const shape = analyzePoints(points);
+                if (shape) {
+                    drawPerfectShape(shape);
+                    showDetectionAnimation();
+                    saveToHistory();
+                }
+            }
+
+            function analyzePoints(points) {
+                if (points.length < 10) return null;
+                
+                const start = points[0];
+                const end = points[points.length - 1];
+                const width = Math.abs(end.x - start.x);
+                const height = Math.abs(end.y - start.y);
+                
+                // Simple shape detection based on current selected shape
+                switch(currentShape) {
+                    case 'line':
+                        return { type: 'line', start, end };
+                    case 'rectangle':
+                        return { type: 'rectangle', x: Math.min(start.x, end.x), y: Math.min(start.y, end.y), width, height };
+                    case 'circle':
+                        const radius = Math.sqrt(width * width + height * height) / 2;
+                        return { type: 'circle', x: start.x, y: start.y, radius };
+                    case 'triangle':
+                        return { type: 'triangle', points: [start, end, {x: start.x, y: end.y}] };
+                    case 'arrow':
+                        return { type: 'arrow', start, end };
+                    case 'star':
+                        return { type: 'star', x: start.x, y: start.y, size: Math.max(width, height) / 2 };
+                    case 'polygon':
+                        return { type: 'polygon', x: start.x, y: start.y, radius: Math.max(width, height) / 2, sides: 6 };
+                }
+                return null;
+            }
+
+            function drawPerfectShape(shape) {
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.strokeStyle = currentColor;
+                ctx.lineWidth = currentSize;
+                ctx.beginPath();
+                
+                switch(shape.type) {
+                    case 'line':
+                        ctx.moveTo(shape.start.x, shape.start.y);
+                        ctx.lineTo(shape.end.x, shape.end.y);
+                        break;
+                    case 'rectangle':
+                        ctx.rect(shape.x, shape.y, shape.width, shape.height);
+                        break;
+                    case 'circle':
+                        ctx.arc(shape.x, shape.y, shape.radius, 0, Math.PI * 2);
+                        break;
+                    case 'triangle':
+                        ctx.moveTo(shape.points[0].x, shape.points[0].y);
+                        ctx.lineTo(shape.points[1].x, shape.points[1].y);
+                        ctx.lineTo(shape.points[2].x, shape.points[2].y);
+                        ctx.closePath();
+                        break;
+                    case 'arrow':
+                        drawArrow(ctx, shape.start, shape.end);
+                        break;
+                    case 'star':
+                        drawStar(ctx, shape.x, shape.y, shape.size);
+                        break;
+                    case 'polygon':
+                        drawPolygon(ctx, shape.x, shape.y, shape.radius, shape.sides);
+                        break;
+                }
+                
+                ctx.stroke();
+            }
+
+            function drawArrow(ctx, start, end) {
+                const headLength = 15;
+                const angle = Math.atan2(end.y - start.y, end.x - start.x);
+                
+                ctx.moveTo(start.x, start.y);
+                ctx.lineTo(end.x, end.y);
+                ctx.lineTo(end.x - headLength * Math.cos(angle - Math.PI/6), end.y - headLength * Math.sin(angle - Math.PI/6));
+                ctx.moveTo(end.x, end.y);
+                ctx.lineTo(end.x - headLength * Math.cos(angle + Math.PI/6), end.y - headLength * Math.sin(angle + Math.PI/6));
+            }
+
+            function drawStar(ctx, cx, cy, size) {
+                const spikes = 5;
+                const outerRadius = size;
+                const innerRadius = size * 0.5;
+                
+                let rot = Math.PI / 2 * 3;
+                ctx.moveTo(cx, cy - outerRadius);
+                
+                for (let i = 0; i < spikes; i++) {
+                    const x1 = cx + Math.cos(rot) * outerRadius;
+                    const y1 = cy + Math.sin(rot) * outerRadius;
+                    ctx.lineTo(x1, y1);
+                    rot += Math.PI / spikes;
+                    
+                    const x2 = cx + Math.cos(rot) * innerRadius;
+                    const y2 = cy + Math.sin(rot) * innerRadius;
+                    ctx.lineTo(x2, y2);
+                    rot += Math.PI / spikes;
+                }
+                
+                ctx.lineTo(cx, cy - outerRadius);
+            }
+
+            function drawPolygon(ctx, x, y, radius, sides) {
+                ctx.moveTo(x + radius, y);
+                for (let i = 1; i <= sides; i++) {
+                    const angle = i * 2 * Math.PI / sides;
+                    ctx.lineTo(x + radius * Math.cos(angle), y + radius * Math.sin(angle));
+                }
+                ctx.closePath();
+            }
+
+            function showDetectionAnimation() {
+                drawingBoard.classList.add('shape-detected');
+                setTimeout(() => {
+                    drawingBoard.classList.remove('shape-detected');
+                }, 1000);
+                status.textContent = `Perfect ${currentShape} detected!`;
+            }
+
+            // Event listeners
+            function setupEventListeners() {
+                // Mouse events
+                canvas.addEventListener('mousedown', startDrawing);
+                canvas.addEventListener('mousemove', draw);
+                canvas.addEventListener('mouseup', stopDrawing);
+                canvas.addEventListener('mouseout', stopDrawing);
+                
+                // Touch events
+                canvas.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    startDrawing(e.touches[0]);
+                });
+                canvas.addEventListener('touchmove', function(e) {
+                    e.preventDefault();
+                    draw(e.touches[0]);
+                });
+                canvas.addEventListener('touchend', stopDrawing);
+
+                // Mode buttons
+                writeModeBtn.addEventListener('click', () => setMode('write'));
+                shapeModeBtn.addEventListener('click', () => setMode('shape'));
+                eraserBtn.addEventListener('click', () => setMode('eraser'));
+
+                // Tools
+                undoBtn.addEventListener('click', undo);
+                redoBtn.addEventListener('click', redo);
+                clearBtn.addEventListener('click', () => {
+                    clearCanvas();
+                    drawingHistory = [];
+                    historyStep = -1;
+                    updateHistoryButtons();
+                    status.textContent = 'Board cleared';
+                });
+
+                // Colors
+                colorOptions.forEach(option => {
+                    option.addEventListener('click', function() {
+                        colorOptions.forEach(opt => opt.classList.remove('selected'));
+                        this.classList.add('selected');
+                        currentColor = this.getAttribute('data-color');
+                    });
+                });
+
+                // Shapes
+                shapeOptions.forEach(option => {
+                    option.addEventListener('click', function() {
+                        shapeOptions.forEach(opt => opt.classList.remove('selected'));
+                        this.classList.add('selected');
+                        currentShape = this.getAttribute('data-shape');
+                        status.textContent = `Selected: ${this.getAttribute('title')}`;
+                    });
+                });
+
+                // Size
+                sizeSlider.addEventListener('input', function() {
+                    currentSize = parseInt(this.value);
+                    sizePreview.textContent = currentSize + 'px';
+                });
+
+                // Board style
+                whiteboardBtn.addEventListener('click', () => {
+                    drawingBoard.classList.remove('chalkboard');
+                    whiteboardBtn.classList.add('active');
+                    chalkboardBtn.classList.remove('active');
+                    clearCanvas();
+                    status.textContent = 'Switched to whiteboard';
+                });
+
+                chalkboardBtn.addEventListener('click', () => {
+                    drawingBoard.classList.add('chalkboard');
+                    chalkboardBtn.classList.add('active');
+                    whiteboardBtn.classList.remove('active');
+                    clearCanvas();
+                    status.textContent = 'Switched to chalkboard';
+                });
+
+                // Recording (simplified - would need server for full implementation)
+                startRecordBtn.addEventListener('click', () => {
+                    status.innerHTML = '<span class="recording-indicator"></span> Recording started';
+                    startRecordBtn.disabled = true;
+                    stopRecordBtn.disabled = false;
+                });
+
+                stopRecordBtn.addEventListener('click', () => {
+                    status.textContent = 'Recording stopped';
+                    startRecordBtn.disabled = false;
+                    stopRecordBtn.disabled = true;
+                    downloadRecordBtn.disabled = false;
+                });
+
+                downloadRecordBtn.addEventListener('click', () => {
+                    status.textContent = 'Download started (demo)';
+                });
+
+                // Window resize
+                window.addEventListener('resize', initCanvas);
+            }
+
+            function setMode(mode) {
+                currentMode = mode;
+                writeModeBtn.classList.toggle('active', mode === 'write');
+                shapeModeBtn.classList.toggle('active', mode === 'shape');
+                eraserBtn.classList.toggle('active', mode === 'eraser');
+                
+                let message = '';
+                switch(mode) {
+                    case 'write': message = 'Write mode: Draw freely'; break;
+                    case 'shape': message = 'Shape mode: Draw rough shapes to auto-detect'; break;
+                    case 'eraser': message = 'Eraser mode: Click and drag to erase'; break;
+                }
+                status.textContent = message;
+            }
+
+            // Initialize
+            initCanvas();
+            setupEventListeners();
+            setMode('write');
+        });
+    </script>
+</body>
+</html>
